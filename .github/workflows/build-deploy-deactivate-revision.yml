@@ -3,6 +3,9 @@ name: Build, Deploy and Deactivate ACA revision
 on:
   pull_request:
     types: [opened, synchronize, closed]
+  # for local testing against ../aca-review-apps with `act` (e.g. `npm run act` in that repo)
+  push:
+  workflow_dispatch:
 
 permissions:
   # for `create-or-update-comment` action
@@ -57,7 +60,11 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Add revision to ACA
-        uses: Azure/aca-review-apps@v0.2.0
+        # Local fork under test: ../aca-review-apps (branch ci-add-build-workflow).
+        # NOTE: this ref must contain a committed lib/main.js (run `npm run build` and
+        # `git add -f lib/*.js lib/*.map` on the fork, then push), otherwise the action
+        # fails at runtime with a missing lib/main.js.
+        uses: koudaiii/aca-review-apps@52eeef4d5e6659f59c032a4aba425b2633740438
         id: aca_new_revision
         with:
           resource-group: ${{ env.RESOURCE_GROUP_NAME }}
@@ -95,7 +102,11 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deactivate Preview revision on ACA
-        uses: Azure/aca-review-apps@v0.2.0
+        # Local fork under test: ../aca-review-apps (branch ci-add-build-workflow).
+        # NOTE: this ref must contain a committed lib/main.js (run `npm run build` and
+        # `git add -f lib/*.js lib/*.map` on the fork, then push), otherwise the action
+        # fails at runtime with a missing lib/main.js.
+        uses: koudaiii/aca-review-apps@52eeef4d5e6659f59c032a4aba425b2633740438
         with:
           resource-group: ${{ env.RESOURCE_GROUP_NAME }}
           name: ${{ env.CONTAINERAPP_NAME }}
